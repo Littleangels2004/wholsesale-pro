@@ -36,9 +36,14 @@
                     <h3 class="text-lg font-semibold text-gray-900">Backend Connection</h3>
                     <p class="text-sm text-gray-600">Status of your Google Apps Script backend</p>
                 </div>
-                <button onclick="testConnection()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                    Test Connection
-                </button>
+                <div>
+                    <button onclick="testConnection()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        Test Connection
+                    </button>
+                    <button onclick="testPostRequest()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 ml-2">
+                        Test POST
+                    </button>
+                </div>
             </div>
             <div id="connection-status" class="mt-4 p-3 rounded-md bg-gray-50">
                 <span class="text-gray-600">Click "Test Connection" to verify backend</span>
@@ -214,7 +219,7 @@
             }
         }
 
-        // Upload catalog file
+        // Upload catalog file - IMPROVED WITH DEBUGGING
         async function uploadCatalog() {
             const fileInput = document.getElementById('catalog-file');
             const file = fileInput.files[0];
@@ -240,14 +245,14 @@
                 const csvData = Papa.parse(text, {
                     header: true,
                     skipEmptyLines: true,
-                    dynamicTyping: true
+                    dynamicTyping: false // Changed to prevent data conversion issues
                 });
 
                 updateProgress('catalog', 40, 'Parsing data...');
                 console.log('Catalog data parsed:', csvData.data.length, 'rows');
 
-                // Process in batches to avoid timeouts
-                const batchSize = 200;
+                // Smaller batch size for better stability
+                const batchSize = 50;
                 const batches = [];
                 for (let i = 0; i < csvData.data.length; i += batchSize) {
                     batches.push(csvData.data.slice(i, i + batchSize));
@@ -261,11 +266,18 @@
                     updateProgress('catalog', 60 + (i * 30 / batches.length), 
                         `Processing batch ${i + 1}/${batches.length}...`);
 
+                    console.log('Sending catalog batch:', {
+                        action: 'uploadCatalogBatch',
+                        batchSize: batch.length,
+                        firstRow: batch[0]
+                    });
+
                     const response = await fetch(API_BASE_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        mode: 'cors',
                         body: JSON.stringify({
                             action: 'uploadCatalogBatch',
                             catalogData: batch,
@@ -278,10 +290,17 @@
                         })
                     });
 
+                    console.log('Catalog response status:', response.status, response.statusText);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
                     const result = await response.json();
+                    console.log('Catalog batch result:', result);
                     
                     if (!result.success) {
-                        throw new Error(result.message);
+                        throw new Error(result.message || 'Upload failed');
                     }
                     
                     totalProcessed += batch.length;
@@ -306,7 +325,7 @@
             }
         }
 
-        // Upload inventory file
+        // Upload inventory file - IMPROVED WITH DEBUGGING
         async function uploadInventory() {
             const fileInput = document.getElementById('inventory-file');
             const file = fileInput.files[0];
@@ -337,8 +356,8 @@
                 updateProgress('inventory', 40, 'Parsing data...');
                 console.log('Inventory data parsed:', csvData.data.length, 'rows');
 
-                // Process in batches
-                const batchSize = 500;
+                // Smaller batch size for better stability
+                const batchSize = 100;
                 const batches = [];
                 for (let i = 0; i < csvData.data.length; i += batchSize) {
                     batches.push(csvData.data.slice(i, i + batchSize));
@@ -352,11 +371,18 @@
                     updateProgress('inventory', 60 + (i * 30 / batches.length), 
                         `Processing batch ${i + 1}/${batches.length}...`);
 
+                    console.log('Sending inventory batch:', {
+                        action: 'uploadInventoryBatch',
+                        batchSize: batch.length,
+                        firstRow: batch[0]
+                    });
+
                     const response = await fetch(API_BASE_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        mode: 'cors',
                         body: JSON.stringify({
                             action: 'uploadInventoryBatch',
                             inventoryData: batch,
@@ -367,10 +393,17 @@
                         })
                     });
 
+                    console.log('Inventory response status:', response.status, response.statusText);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
                     const result = await response.json();
+                    console.log('Inventory batch result:', result);
                     
                     if (!result.success) {
-                        throw new Error(result.message);
+                        throw new Error(result.message || 'Upload failed');
                     }
                     
                     totalUpdated += result.data?.updated || 0;
@@ -502,14 +535,13 @@
         // Initialize - Test connection on page load
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Admin panel loaded!');
-            testConnection(); <button onclick="testPostRequest()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 ml-2">
-    Test POST
-</button> // Automatically test connection<!-- Add this button next to the "Test Connection" button -->
-
+            testConnection(); // Automatically test connection
         });
-    // DEBUG: Test POST request - Add this before closing </script> tag
+
+        // DEBUG: Test POST request functionality
         async function testPostRequest() {
             console.log('Testing POST request...');
+            showStatus('info', 'Testing POST request...');
             
             try {
                 const response = await fetch(API_BASE_URL, {
@@ -517,28 +549,36 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    mode: 'cors',
                     body: JSON.stringify({
                         action: 'getProducts'
                     })
                 });
 
-                console.log('Response status:', response.status);
-                console.log('Response ok:', response.ok);
+                console.log('POST Response status:', response.status);
+                console.log('POST Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 
                 const result = await response.json();
-                console.log('Result:', result);
+                console.log('POST Result:', result);
                 
                 if (result.success) {
-                    alert('✅ POST request works! Issue is with file upload format.');
+                    showStatus('success', '✅ POST request works! Your backend can handle POST requests.');
+                    addActivity('POST Test', 'POST request successful', 'success');
                 } else {
-                    alert('❌ POST request failed: ' + result.message);
+                    showStatus('error', '❌ POST request failed: ' + (result.message || 'Unknown error'));
+                    addActivity('POST Test', 'POST failed: ' + (result.message || 'Unknown error'), 'error');
                 }
                 
             } catch (error) {
                 console.error('POST test error:', error);
-                alert('❌ POST test failed: ' + error.message);
+                showStatus('error', '❌ POST test failed: ' + error.message);
+                addActivity('POST Test', 'POST error: ' + error.message, 'error');
             }
         }
-</script>
+    </script>
 </body>
 </html>
