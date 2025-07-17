@@ -502,8 +502,43 @@
         // Initialize - Test connection on page load
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Admin panel loaded!');
-            testConnection(); // Automatically test connection
+            testConnection(); // Automatically test connection<!-- Add this button next to the "Test Connection" button -->
+<button onclick="testPostRequest()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 ml-2">
+    Test POST
+</button>
         });
-    </script>
+    // DEBUG: Test POST request - Add this before closing </script> tag
+        async function testPostRequest() {
+            console.log('Testing POST request...');
+            
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'getProducts'
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                const result = await response.json();
+                console.log('Result:', result);
+                
+                if (result.success) {
+                    alert('✅ POST request works! Issue is with file upload format.');
+                } else {
+                    alert('❌ POST request failed: ' + result.message);
+                }
+                
+            } catch (error) {
+                console.error('POST test error:', error);
+                alert('❌ POST test failed: ' + error.message);
+            }
+        }
+</script>
 </body>
 </html>
