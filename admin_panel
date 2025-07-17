@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wholesale Platform - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 2px solid #f0f4f8;
+            border-radius: 12px;
+            background: #fafbfc;
+        }
+
+        .section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: #4facfe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #4facfe;
+            background: #f7fafc;
+        }
+
+        .upload-area.dragover {
+            border-color: #4facfe;
+            background: #ebf8ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #a0aec0;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .upload-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+            display: none;
+        }
+
+        .message.success {
+            background: #f0fff4;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .message.error {
+            background: #fff5f5;
+            color: #742a2a;
+            border: 1px solid #feb2b2;
+        }
+
+        .config-section {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+        }
+
+        .config-section h2 {
+            color: #e53e3e;
+        }
+
+        .config-section .section-icon {
+            background: #e53e3e;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .test-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn:hover {
+            background: #38a169;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-connected {
+            background: #48bb78;
+        }
+
+        .status-disconnected {
+            background: #e53e3e;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #edf2f7;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #4a5568;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Wholesale Platform</h1>
+            <p>Admin Panel - Upload & Manage Your Inventory</p>
+        </div>
+
+        <div class="content">
+            <!-- Configuration Section -->
+            <div class="section config-section">
+                <h2>
+                    <div class="section-icon">⚙️</div>
+                    Configuration
+                </h2>
+                <p style="margin-bottom: 20px; color: #718096;">
+                    Enter your Google Apps Script URL below and test the connection.
+                </p>
+                <input 
+                    type="text" 
+                    id="scriptUrl" 
+                    class="config-input" 
+                    placeholder="Paste your Google Apps Script URL here..."
+                    value="https://script.google.com/macros/s/AKfycbwE0kfh29PnJpH72RKUm6qUjAEH4dPugSfSphzgrvqDvg7kKPrN2xgx7yNUSOLdez66/exec"
+                >
+                <button onclick="testConnection()" class="test-btn">
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    Test Connection
+                </button>
+                <div id="connectionMessage" class="message"></div>
+            </div>
+
+            <!-- Catalog Upload Section -->
+            <div class="section">
+                <h2>
+                    <div class="section-icon">📊</div>
+                    Upload Product Catalog
+                </h2>
+                <p style="margin-bottom: 20px; color: #718096;">
+                    Upload a CSV file with columns: Parent SKU Code, Child SKU Code, Color, Size, Category, MRP, WSP, Image URL, HSN
+                </p>
+                
+                <div class="upload-area" onclick="document.getElementById('catalogFile').click()">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Click to select catalog CSV file</div>
+                    <div class="upload-subtext">or drag and drop your file here</div>
+                </div>
+                
+                <input type="file" id="catalogFile" class="file-input" accept=".csv" onchange="handleFileSelect(this, 'catalog')">
+                <div id="catalogInfo" class="file-info"></div>
+                <div id="catalogProgress" class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+                <button id="catalogUpload" class="upload-btn" onclick="uploadFile('catalog')" disabled>
+                    Upload Catalog
+                </button>
+                <div id="catalogMessage" class="message"></div>
+            </div>
+
+            <!-- Inventory Upload Section -->
+            <div class="section">
+                <h2>
+                    <div class="section-icon">📦</div>
+                    Upload Inventory Data
+                </h2>
+                <p style="margin-bottom: 20px; color: #718096;">
+                    Upload a CSV file with SKU codes in column F and quantities in column H
+                </p>
+                
+                <div class="upload-area" onclick="document.getElementById('inventoryFile').click()">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Click to select inventory CSV file</div>
+                    <div class="upload-subtext">or drag and drop your file here</div>
+                </div>
+                
+                <input type="file" id="inventoryFile" class="file-input" accept=".csv" onchange="handleFileSelect(this, 'inventory')">
+                <div id="inventoryInfo" class="file-info"></div>
+                <div id="inventoryProgress" class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+                <button id="inventoryUpload" class="upload-btn" onclick="uploadFile('inventory')" disabled>
+                    Upload Inventory
+                </button>
+                <div id="inventoryMessage" class="message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = {
+            catalog: null,
+            inventory: null
+        };
+
+        // Test connection to Google Apps Script
+        async function testConnection() {
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            const messageDiv = document.getElementById('connectionMessage');
+            const statusIndicator = document.getElementById('statusIndicator');
+            
+            if (!scriptUrl) {
+                showMessage(messageDiv, 'Please enter your Google Apps Script URL', 'error');
+                statusIndicator.className = 'status-indicator status-disconnected';
+                return;
+            }
+
+            try {
+                messageDiv.textContent = 'Testing connection...';
+                messageDiv.className = 'message';
+                messageDiv.style.display = 'block';
+                statusIndicator.className = 'status-indicator status-disconnected';
+
+                const response = await fetch(`${scriptUrl}?action=test`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage(messageDiv, '✅ Connection successful! Ready to upload files.', 'success');
+                    statusIndicator.className = 'status-indicator status-connected';
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                showMessage(messageDiv, `❌ Connection failed: ${error.message}`, 'error');
+                statusIndicator.className = 'status-indicator status-disconnected';
+            }
+        }
+
+        // Handle file selection
+        function handleFileSelect(input, type) {
+            const file = input.files[0];
+            const infoDiv = document.getElementById(`${type}Info`);
+            const uploadBtn = document.getElementById(`${type}Upload`);
+            
+            if (file) {
+                selectedFiles[type] = file;
+                infoDiv.innerHTML = `
+                    <strong>Selected file:</strong> ${file.name}<br>
+                    <strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
+                    <strong>Type:</strong> ${file.type}
+                `;
+                infoDiv.style.display = 'block';
+                uploadBtn.disabled = false;
+            } else {
+                selectedFiles[type] = null;
+                infoDiv.style.display = 'none';
+                uploadBtn.disabled = true;
+            }
+        }
+
+        // Upload file function
+        async function uploadFile(type) {
+            const file = selectedFiles[type];
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            const messageDiv = document.getElementById(`${type}Message`);
+            const progressDiv = document.getElementById(`${type}Progress`);
+            const progressBar = progressDiv.querySelector('.progress-bar');
+            const uploadBtn = document.getElementById(`${type}Upload`);
+
+            if (!file) {
+                showMessage(messageDiv, 'Please select a file first', 'error');
+                return;
+            }
+
+            if (!scriptUrl) {
+                showMessage(messageDiv, 'Please enter your Google Apps Script URL', 'error');
+                return;
+            }
+
+            try {
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Uploading...';
+                progressDiv.style.display = 'block';
+                progressBar.style.width = '10%';
+
+                // Read file content
+                const fileContent = await readFileContent(file);
+                progressBar.style.width = '30%';
+
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('action', type === 'catalog' ? 'upload_catalog' : 'upload_inventory');
+                formData.append('csvData', fileContent);
+
+                progressBar.style.width = '50%';
+
+                // Send to Google Apps Script
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'cors'
+                });
+
+                progressBar.style.width = '80%';
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                progressBar.style.width = '100%';
+
+                if (result.status === 'success') {
+                    showMessage(messageDiv, `✅ ${result.message}`, 'success');
+                    
+                    // Reset file selection
+                    document.getElementById(`${type}File`).value = '';
+                    selectedFiles[type] = null;
+                    document.getElementById(`${type}Info`).style.display = 'none';
+                } else {
+                    showMessage(messageDiv, `❌ Upload failed: ${result.message}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                showMessage(messageDiv, `❌ Upload failed: ${error.message}`, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = type === 'catalog' ? 'Upload Catalog' : 'Upload Inventory';
+                
+                // Hide progress bar after 2 seconds
+                setTimeout(() => {
+                    progressDiv.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 2000);
+            }
+        }
+
+        // Read file content as text
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }
+
+        // Show message helper
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `message ${type}`;
+            element.style.display = 'block';
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Add drag and drop functionality
+        document.querySelectorAll('.upload-area').forEach(area => {
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragover');
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const type = area.parentElement.querySelector('.file-input').id.includes('catalog') ? 'catalog' : 'inventory';
+                    const input = document.getElementById(`${type}File`);
+                    input.files = files;
+                    handleFileSelect(input, type);
+                }
+            });
+        });
+
+        // Test connection on page load
+        window.addEventListener('load', () => {
+            // Auto-test connection if URL is already filled
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            if (scriptUrl) {
+                testConnection();
+            }
+        });
+    </script>
+</body>
+</html>
