@@ -272,22 +272,20 @@
                         firstRow: batch[0]
                     });
 
+                    // Use FormData to avoid CORS preflight
+                    const formData = new FormData();
+                    formData.append('action', 'uploadCatalogBatch');
+                    formData.append('catalogData', JSON.stringify(batch));
+                    formData.append('batchInfo', JSON.stringify({
+                        current: i + 1,
+                        total: batches.length,
+                        isFirst: i === 0,
+                        isLast: i === batches.length - 1
+                    }));
+
                     const response = await fetch(API_BASE_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        mode: 'cors',
-                        body: JSON.stringify({
-                            action: 'uploadCatalogBatch',
-                            catalogData: batch,
-                            batchInfo: {
-                                current: i + 1,
-                                total: batches.length,
-                                isFirst: i === 0,
-                                isLast: i === batches.length - 1
-                            }
-                        })
+                        body: formData
                     });
 
                     console.log('Catalog response status:', response.status, response.statusText);
@@ -377,20 +375,18 @@
                         firstRow: batch[0]
                     });
 
+                    // Use FormData to avoid CORS preflight
+                    const formData = new FormData();
+                    formData.append('action', 'uploadInventoryBatch');
+                    formData.append('inventoryData', JSON.stringify(batch));
+                    formData.append('batchInfo', JSON.stringify({
+                        current: i + 1,
+                        total: batches.length
+                    }));
+
                     const response = await fetch(API_BASE_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        mode: 'cors',
-                        body: JSON.stringify({
-                            action: 'uploadInventoryBatch',
-                            inventoryData: batch,
-                            batchInfo: {
-                                current: i + 1,
-                                total: batches.length
-                            }
-                        })
+                        body: formData
                     });
 
                     console.log('Inventory response status:', response.status, response.statusText);
@@ -538,21 +534,19 @@
             testConnection(); // Automatically test connection
         });
 
-        // DEBUG: Test POST request functionality
+        // DEBUG: Test POST request functionality - FIXED FOR CORS
         async function testPostRequest() {
             console.log('Testing POST request...');
             showStatus('info', 'Testing POST request...');
             
             try {
+                // Use FormData instead of JSON to avoid CORS preflight
+                const formData = new FormData();
+                formData.append('action', 'getProducts');
+
                 const response = await fetch(API_BASE_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    mode: 'cors',
-                    body: JSON.stringify({
-                        action: 'getProducts'
-                    })
+                    body: formData
                 });
 
                 console.log('POST Response status:', response.status);
