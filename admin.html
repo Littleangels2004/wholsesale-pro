@@ -502,10 +502,10 @@
         // Initialize - Test connection on page load
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Admin panel loaded!');
-            testConnection(); // Automatically test connection<!-- Add this button next to the "Test Connection" button -->
-<button onclick="testPostRequest()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 ml-2">
+            testConnection(); <button onclick="testPostRequest()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 ml-2">
     Test POST
-</button>
+</button> // Automatically test connection<!-- Add this button next to the "Test Connection" button -->
+
         });
     // DEBUG: Test POST request - Add this before closing </script> tag
         async function testPostRequest() {
