@@ -40,9 +40,6 @@
                     <button onclick="testConnection()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                         Test Connection
                     </button>
-                    <button onclick="testPostRequest()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 ml-2">
-                        Test POST
-                    </button>
                 </div>
             </div>
             <div id="connection-status" class="mt-4 p-3 rounded-md bg-gray-50">
@@ -219,7 +216,7 @@
             }
         }
 
-        // Upload catalog file - IMPROVED WITH DEBUGGING
+        // FIXED: Upload catalog file - Now sends JSON instead of FormData
         async function uploadCatalog() {
             const fileInput = document.getElementById('catalog-file');
             const file = fileInput.files[0];
@@ -245,7 +242,7 @@
                 const csvData = Papa.parse(text, {
                     header: true,
                     skipEmptyLines: true,
-                    dynamicTyping: false // Changed to prevent data conversion issues
+                    dynamicTyping: false
                 });
 
                 updateProgress('catalog', 40, 'Parsing data...');
@@ -266,29 +263,23 @@
                     updateProgress('catalog', 60 + (i * 30 / batches.length), 
                         `Processing batch ${i + 1}/${batches.length}...`);
 
-                    console.log('Sending catalog batch:', {
-                        action: 'uploadCatalogBatch',
-                        batchSize: batch.length,
-                        firstRow: batch[0]
-                    });
-
-                    // Use FormData to avoid CORS preflight
-                    const formData = new FormData();
-                    formData.append('action', 'uploadCatalogBatch');
-                    formData.append('catalogData', JSON.stringify(batch));
-                    formData.append('batchInfo', JSON.stringify({
-                        current: i + 1,
-                        total: batches.length,
-                        isFirst: i === 0,
-                        isLast: i === batches.length - 1
-                    }));
-
+                    // FIXED: Send as JSON, not FormData
                     const response = await fetch(API_BASE_URL, {
                         method: 'POST',
-                        body: formData
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'uploadCatalogBatch',
+                            catalogData: batch,
+                            batchInfo: {
+                                current: i + 1,
+                                total: batches.length,
+                                isFirst: i === 0,
+                                isLast: i === batches.length - 1
+                            }
+                        })
                     });
-
-                    console.log('Catalog response status:', response.status, response.statusText);
 
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -323,7 +314,7 @@
             }
         }
 
-        // Upload inventory file - IMPROVED WITH DEBUGGING
+        // FIXED: Upload inventory file - Now sends JSON instead of FormData
         async function uploadInventory() {
             const fileInput = document.getElementById('inventory-file');
             const file = fileInput.files[0];
@@ -369,27 +360,21 @@
                     updateProgress('inventory', 60 + (i * 30 / batches.length), 
                         `Processing batch ${i + 1}/${batches.length}...`);
 
-                    console.log('Sending inventory batch:', {
-                        action: 'uploadInventoryBatch',
-                        batchSize: batch.length,
-                        firstRow: batch[0]
-                    });
-
-                    // Use FormData to avoid CORS preflight
-                    const formData = new FormData();
-                    formData.append('action', 'uploadInventoryBatch');
-                    formData.append('inventoryData', JSON.stringify(batch));
-                    formData.append('batchInfo', JSON.stringify({
-                        current: i + 1,
-                        total: batches.length
-                    }));
-
+                    // FIXED: Send as JSON, not FormData
                     const response = await fetch(API_BASE_URL, {
                         method: 'POST',
-                        body: formData
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'uploadInventoryBatch',
+                            inventoryData: batch,
+                            batchInfo: {
+                                current: i + 1,
+                                total: batches.length
+                            }
+                        })
                     });
-
-                    console.log('Inventory response status:', response.status, response.statusText);
 
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -533,46 +518,6 @@
             console.log('Admin panel loaded!');
             testConnection(); // Automatically test connection
         });
-
-        // DEBUG: Test POST request functionality - FIXED FOR CORS
-        async function testPostRequest() {
-            console.log('Testing POST request...');
-            showStatus('info', 'Testing POST request...');
-            
-            try {
-                // Use FormData instead of JSON to avoid CORS preflight
-                const formData = new FormData();
-                formData.append('action', 'getProducts');
-
-                const response = await fetch(API_BASE_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                console.log('POST Response status:', response.status);
-                console.log('POST Response ok:', response.ok);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                console.log('POST Result:', result);
-                
-                if (result.success) {
-                    showStatus('success', '✅ POST request works! Your backend can handle POST requests.');
-                    addActivity('POST Test', 'POST request successful', 'success');
-                } else {
-                    showStatus('error', '❌ POST request failed: ' + (result.message || 'Unknown error'));
-                    addActivity('POST Test', 'POST failed: ' + (result.message || 'Unknown error'), 'error');
-                }
-                
-            } catch (error) {
-                console.error('POST test error:', error);
-                showStatus('error', '❌ POST test failed: ' + error.message);
-                addActivity('POST Test', 'POST error: ' + error.message, 'error');
-            }
-        }
     </script>
 </body>
 </html>
